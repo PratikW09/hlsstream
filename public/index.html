@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLS Video Upload and Player</title>
+    <link href="https://vjs.zencdn.net/7.19.2/video-js.css" rel="stylesheet" />
+</head>
+<body>
+    <h1>Upload Video for HLS Streaming</h1>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="videoFile" accept="video/*" required />
+        <button type="submit">Upload Video</button>
+    </form>
+
+    <div id="videoContainer" style="display:none;">
+        <h2>Watch Your Video</h2>
+        <video
+            id="my-video"
+            class="video-js vjs-big-play-centered vjs-theme-sea"
+            controls
+            preload="auto"
+            width="640"
+            height="360"
+            poster="https://www.tutorialspoint.com/videos/sample.png"
+            data-setup='{}'
+        >
+            <source id="videoSource" src="" type="application/x-mpegURL">
+            Your browser does not support HTML5 video.
+        </video>
+    </div>
+
+    <script src="https://vjs.zencdn.net/7.19.2/video.min.js"></script>
+    <script>
+        document.getElementById('uploadForm').onsubmit = function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Assuming data contains the URL to your m3u8 file
+                const videoSrc = '/hls/master.m3u8'; // Adjust the path based on your HLS setup
+                document.getElementById('videoSource').src = videoSrc; // Set the source
+                document.getElementById('videoContainer').style.display = 'block'; // Show video container
+                var player = videojs('my-video');
+                player.load(); // Load the new source
+                player.play(); // Play the video
+            })
+            .catch(err => {
+                console.error(err);
+            });
+        };
+    </script>
+</body>
+</html>
